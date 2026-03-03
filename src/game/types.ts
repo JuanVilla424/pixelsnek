@@ -39,3 +39,14 @@ export interface GameCallbacks {
   onDeath?: (position: Position) => void
   onStateChange?: (state: GameState) => void
 }
+
+export interface Particle {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  color: string
+  alpha: number
+  lifetime: number
+  maxLifetime: number
+}
