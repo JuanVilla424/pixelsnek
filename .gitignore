@@ -1,3 +1,7 @@
+# Claude / AI agent files (never commit)
+CLAUDE.md
+MEMORY.md
+
 # Node.js / npm
 node_modules/
 npm-debug.log*
