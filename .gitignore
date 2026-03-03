@@ -1,6 +1,10 @@
 # Claude / AI agent files (never commit)
 CLAUDE.md
 MEMORY.md
+CONTEXT.md
+
+# Security
+*.pem
 
 # Node.js / npm
 node_modules/

@@ -1,6 +1,6 @@
-# 🤝 Contributing to github-cicd-template
+# 🤝 Contributing to pixelsnek
 
-We welcome contributions to github-cicd-template! To make sure the process goes smoothly, please follow these guidelines:
+We welcome contributions to pixelsnek! To make sure the process goes smoothly, please follow these guidelines:
 
 ## 📋 Code of Conduct
 
@@ -22,8 +22,7 @@ Please note that all participants in our project are expected to follow our [Cod
 4. **Test your changes**:
    Run the test suite to ensure your changes don’t break any functionality:
 
-   docker-compose exec backend pytest # For backend tests
-   docker-compose exec frontend npm test # For frontend tests
+   npm run test
 
 5. **Commit your changes**:
    Use meaningful commit messages that explain what you have done:
@@ -40,11 +39,11 @@ Please note that all participants in our project are expected to follow our [Cod
 
 ## 📑 Guidelines for Contributions
 
-- **Lint your code** before submitting a pull request. We use [ESLint](https://eslint.org/) for frontend and [pylint](https://www.pylint.org/) for backend linting.
+- **Lint your code** before submitting a pull request. We use [ESLint](https://eslint.org/) for linting and [pre-commit](https://pre-commit.com/) hooks for code quality enforcement.
 - Ensure **test coverage** for your code. Uncovered code may delay the approval process.
 - Write clear, concise **commit messages**.
 
-Thank you for helping improve!
+Thank you for helping improve pixelsnek!
 
 ---
 
