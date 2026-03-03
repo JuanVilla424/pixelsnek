@@ -1,4 +1,4 @@
-import { Direction, isOpposite } from '../game/Direction'
+import { Direction, isOppositeDirection } from '../game/types'
 
 const MAX_QUEUE_SIZE = 2
 const SWIPE_THRESHOLD = 30
@@ -66,7 +66,7 @@ export class InputManager {
     const reference =
       this.queue.length > 0 ? this.queue[this.queue.length - 1] : this.currentDirection
 
-    if (reference !== undefined && reference !== null && isOpposite(reference, dir)) return
+    if (reference !== undefined && reference !== null && isOppositeDirection(reference, dir)) return
 
     this.queue.push(dir)
     this.onDirectionChangeCb?.(dir)

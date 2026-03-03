@@ -1,17 +1,17 @@
 import { Direction, Position } from './types'
 
 const OPPOSITE: Record<Direction, Direction> = {
-  [Direction.UP]: Direction.DOWN,
-  [Direction.DOWN]: Direction.UP,
-  [Direction.LEFT]: Direction.RIGHT,
-  [Direction.RIGHT]: Direction.LEFT,
+  [Direction.Up]: Direction.Down,
+  [Direction.Down]: Direction.Up,
+  [Direction.Left]: Direction.Right,
+  [Direction.Right]: Direction.Left,
 }
 
 const DELTA: Record<Direction, Position> = {
-  [Direction.UP]: { x: 0, y: -1 },
-  [Direction.DOWN]: { x: 0, y: 1 },
-  [Direction.LEFT]: { x: -1, y: 0 },
-  [Direction.RIGHT]: { x: 1, y: 0 },
+  [Direction.Up]: { x: 0, y: -1 },
+  [Direction.Down]: { x: 0, y: 1 },
+  [Direction.Left]: { x: -1, y: 0 },
+  [Direction.Right]: { x: 1, y: 0 },
 }
 
 export class Snake {
@@ -20,8 +20,8 @@ export class Snake {
   nextDirection: Direction
 
   constructor(startX: number, startY: number, length: number = 3) {
-    this.direction = Direction.RIGHT
-    this.nextDirection = Direction.RIGHT
+    this.direction = Direction.Right
+    this.nextDirection = Direction.Right
     this.segments = []
     for (let i = length - 1; i >= 0; i--) {
       this.segments.push({ x: startX - i, y: startY })
@@ -61,5 +61,9 @@ export class Snake {
   checkWallCollision(gridWidth: number, gridHeight: number): boolean {
     const head = this.getHead()
     return head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight
+  }
+
+  getSegments(): Position[] {
+    return this.segments
   }
 }

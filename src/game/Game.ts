@@ -1,17 +1,10 @@
-import { GameState, GameConfig, Direction, Position } from './types'
+import { GameState, GameConfig, GameCallbacks, Direction, Position } from './types'
 import { Grid } from './Grid'
 import { Snake } from './Snake'
 import { Food } from './Food'
 import { getSpeedForLevel, getLevelForScore } from './Level'
 export { Direction } from './types'
-
-export interface GameCallbacks {
-  onScoreChange?: (score: number) => void
-  onLevelChange?: (level: number) => void
-  onEat?: () => void
-  onDeath?: () => void
-  onStateChange?: (state: GameState) => void
-}
+export type { GameCallbacks } from './types'
 
 const DEFAULT_CONFIG: GameConfig = {
   gridWidth: 20,
@@ -20,10 +13,10 @@ const DEFAULT_CONFIG: GameConfig = {
 }
 
 const DIRECTION_DELTA: Record<Direction, Position> = {
-  [Direction.UP]: { x: 0, y: -1 },
-  [Direction.DOWN]: { x: 0, y: 1 },
-  [Direction.LEFT]: { x: -1, y: 0 },
-  [Direction.RIGHT]: { x: 1, y: 0 },
+  [Direction.Up]: { x: 0, y: -1 },
+  [Direction.Down]: { x: 0, y: 1 },
+  [Direction.Left]: { x: -1, y: 0 },
+  [Direction.Right]: { x: 1, y: 0 },
 }
 
 export class Game {
@@ -87,7 +80,7 @@ export class Game {
 
     if (eats) {
       this.score++
-      this.callbacks.onEat?.()
+      this.callbacks.onEat?.(this.snake.getHead())
       this.callbacks.onScoreChange?.(this.score)
 
       const newLevel = getLevelForScore(this.score)
@@ -129,7 +122,7 @@ export class Game {
     if (this.score > this.highScore) {
       this.highScore = this.score
     }
-    this.callbacks.onDeath?.()
+    this.callbacks.onDeath?.(this.snake.getHead())
     this._setState(GameState.GAME_OVER)
   }
 
