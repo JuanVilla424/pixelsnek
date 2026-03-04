@@ -40,30 +40,35 @@ pixelsnek/
 ## 🔄 Data Flow
 
 ```
-User Input (keyboard/touch)
+User Input (keyboard/touch swipe)
     ↓
-InputManager (src/engine/Input.ts)
+InputManager (src/engine/Input.ts) — keyboard + touch swipe handler
     ↓
 Game State (src/game/) — snake position, direction, score, food
     ↓
-Renderer (src/engine/Renderer.ts) — draws to Canvas 2D context
-    ├── HUD (src/ui/HUD.ts) — overlays score, level, game over screen
+Renderer (src/engine/Renderer.ts) — draws to Canvas 2D context (responsive resize)
+    ├── HUD (src/ui/HUD.ts) — overlays score, level, game over screen, touch hint
     ├── Leaderboard (src/ui/Leaderboard.ts) — score history panel
     └── ParticleSystem (src/engine/Particles.ts) — visual effects on eat/death
 ```
 
 ## 🧩 Design Decisions
 
-| Decision             | Choice              | Rationale                                            |
-| -------------------- | ------------------- | ---------------------------------------------------- |
-| Runtime dependencies | None                | Canvas 2D API covers all rendering needs             |
-| Rendering            | Canvas 2D           | Performant, simple, no framework overhead            |
-| Language             | TypeScript strict   | Catches bugs at compile time, no `any` types         |
-| Build tool           | Vite                | Fast HMR, zero-config TypeScript, ES module output   |
-| Base path            | `/pixelsnek/`       | Required for GitHub Pages subdirectory deployment    |
-| State management     | Explicit parameters | No global state — functions receive and return state |
-| Branch strategy      | dev → main          | Trunk-based development with stable main branch      |
-| License              | GPLv3               | Standard open-source license                         |
-| Theme                | CSS vars + canvas   | OS preference detection, toggle, persisted setting   |
-| Settings             | localStorage        | Grid size, speed, particles, controls — persisted    |
-| Leaderboard          | localStorage        | Top 10 scores with name entry, date, level           |
+| Decision             | Choice              | Rationale                                                                           |
+| -------------------- | ------------------- | ----------------------------------------------------------------------------------- |
+| Runtime dependencies | None                | Canvas 2D API covers all rendering needs                                            |
+| Rendering            | Canvas 2D           | Performant, simple, no framework overhead                                           |
+| Language             | TypeScript strict   | Catches bugs at compile time, no `any` types                                        |
+| Build tool           | Vite                | Fast HMR, zero-config TypeScript, ES module output                                  |
+| Base path            | `/pixelsnek/`       | Required for GitHub Pages subdirectory deployment                                   |
+| State management     | Explicit parameters | No global state — functions receive and return state                                |
+| Branch strategy      | dev → main          | Trunk-based development with stable main branch                                     |
+| License              | GPLv3               | Standard open-source license                                                        |
+| Theme                | CSS vars + canvas   | OS preference detection, toggle, persisted setting                                  |
+| Settings             | localStorage        | Grid size, speed, particles, controls — persisted                                   |
+| Leaderboard          | localStorage        | Top 10 scores with name entry, date, level                                          |
+| Responsive canvas    | Dynamic resize      | Portrait: full-width with grid aspect ratio; landscape: full-height                 |
+| Mobile touch lock    | CSS + JS            | `touch-action: none/manipulation`, `overscroll-behavior: none`, `user-select: none` |
+| Haptic feedback      | Progressive enhance | `navigator.vibrate` feature-detected; eat=10ms, death=[50,50,50]ms                  |
+| PWA manifest         | manifest.json       | Enables Add to Home Screen; standalone display mode                                 |
+| GitHub Pages deploy  | deploy.yml workflow | Triggers on push to main via actions/deploy-pages                                   |

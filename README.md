@@ -29,8 +29,13 @@ A classic snake game built with vanilla TypeScript and the Canvas 2D API — no 
 - 🎨 Zero runtime dependencies — pure TypeScript + Canvas 2D API
 - 🏆 Score tracking and leaderboard
 - ✨ Particle effects on food consumption and game over
-- 📱 Keyboard input with configurable controls
-- 🌐 GitHub Pages deployment ready
+- ⌨️ Keyboard input with configurable controls (WASD / Arrow Keys / Vi-keys)
+- 📱 Fully responsive — fills mobile screen in portrait and landscape without scrollbars
+- 👆 Touch swipe controls with first-play hint overlay
+- 📳 Haptic feedback on eat and death (Android Chrome via `navigator.vibrate`)
+- 🔒 Mobile browser lock — no pull-to-refresh, no double-tap zoom, no context menu on long press
+- 🧩 PWA manifest — installable as a home-screen app (`Add to Home Screen`)
+- 🌐 Auto-deploys to GitHub Pages on push to `main`
 
 ## 🚀 Getting Started
 

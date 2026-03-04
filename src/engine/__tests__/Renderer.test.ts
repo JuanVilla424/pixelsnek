@@ -158,6 +158,78 @@ describe('Renderer.resize()', () => {
     expect(canvas.style.top).toBe(`${expectedTop}px`)
   })
 
+  it('portrait: canvas height derived from grid aspect ratio (non-square grid)', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 375, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 812, configurable: true })
+
+    // 10x20 grid: aspectRatio = 10/20 = 0.5
+    // portrait: displayWidth=375, displayHeight=Math.round(375/0.5)=750, 750 < 812 no clamp
+    const { canvas } = makeRenderer(10, 20)
+    expect(canvas.style.width).toBe('375px')
+    expect(canvas.style.height).toBe('750px')
+  })
+
+  it('landscape: canvas width derived from grid aspect ratio (non-square grid)', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 844, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 390, configurable: true })
+
+    // 40x20 grid: aspectRatio = 40/20 = 2.0
+    // landscape: displayHeight=390, displayWidth=Math.round(390*2)=780, 780 < 844 no clamp
+    const { canvas } = makeRenderer(40, 20)
+    expect(canvas.style.width).toBe('780px')
+    expect(canvas.style.height).toBe('390px')
+  })
+
+  it('portrait: height clamped to viewport when grid displayHeight would exceed innerHeight', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 200, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 375, configurable: true })
+
+    // 10x40 grid: aspectRatio = 10/40 = 0.25, portrait (vw=200 < vh=375)
+    // displayWidth=200, displayHeight=Math.round(200/0.25)=800 > 375
+    // clamped: displayHeight=375, displayWidth=Math.round(375*0.25)=94
+    const { canvas } = makeRenderer(10, 40)
+    expect(canvas.style.height).toBe('375px')
+    expect(canvas.style.width).toBe('94px')
+  })
+
+  it('landscape: width clamped to viewport when grid displayWidth would exceed innerWidth', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 500, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 300, configurable: true })
+
+    // 40x10 grid: aspectRatio = 40/10 = 4.0, landscape (vw=500 >= vh=300)
+    // displayHeight=300, displayWidth=Math.round(300*4)=1200 > 500
+    // clamped: displayWidth=500, displayHeight=Math.round(500/4)=125
+    const { canvas } = makeRenderer(40, 10)
+    expect(canvas.style.width).toBe('500px')
+    expect(canvas.style.height).toBe('125px')
+  })
+
+  it('portrait: canvas pixel buffer dimensions scaled by dpr with non-square grid', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 2, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 375, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 812, configurable: true })
+
+    // 10x20 grid: aspectRatio=0.5, portrait → displayWidth=375, displayHeight=750
+    const { canvas } = makeRenderer(10, 20)
+    expect(canvas.width).toBe(Math.round(375 * 2))
+    expect(canvas.height).toBe(Math.round(750 * 2))
+  })
+
+  it('landscape: canvas pixel buffer dimensions scaled by dpr with non-square grid', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 2, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 844, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 390, configurable: true })
+
+    // 40x20 grid: aspectRatio=2, landscape → displayWidth=780, displayHeight=390
+    const { canvas } = makeRenderer(40, 20)
+    expect(canvas.width).toBe(Math.round(780 * 2))
+    expect(canvas.height).toBe(Math.round(390 * 2))
+  })
+
   it('recomputes on window resize event', () => {
     Object.defineProperty(window, 'innerWidth', { value: 400, configurable: true })
     Object.defineProperty(window, 'innerHeight', { value: 400, configurable: true })

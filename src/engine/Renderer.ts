@@ -41,18 +41,39 @@ export class Renderer {
 
   resize(): void {
     const dpr = window.devicePixelRatio || 1
-    const size = Math.min(window.innerWidth, window.innerHeight)
-    this.displayWidth = size
-    this.displayHeight = size
-    this.canvas.width = Math.round(size * dpr)
-    this.canvas.height = Math.round(size * dpr)
-    this.canvas.style.width = `${size}px`
-    this.canvas.style.height = `${size}px`
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const aspectRatio = this.gridWidth / this.gridHeight
+    let displayWidth: number
+    let displayHeight: number
+    if (vw < vh) {
+      // Portrait: fill full width, height follows grid aspect ratio
+      displayWidth = vw
+      displayHeight = Math.round(vw / aspectRatio)
+      if (displayHeight > vh) {
+        displayHeight = vh
+        displayWidth = Math.round(vh * aspectRatio)
+      }
+    } else {
+      // Landscape: fill full height, width follows grid aspect ratio
+      displayHeight = vh
+      displayWidth = Math.round(vh * aspectRatio)
+      if (displayWidth > vw) {
+        displayWidth = vw
+        displayHeight = Math.round(vw / aspectRatio)
+      }
+    }
+    this.displayWidth = displayWidth
+    this.displayHeight = displayHeight
+    this.canvas.width = Math.round(displayWidth * dpr)
+    this.canvas.height = Math.round(displayHeight * dpr)
+    this.canvas.style.width = `${displayWidth}px`
+    this.canvas.style.height = `${displayHeight}px`
     this.canvas.style.position = 'absolute'
-    this.canvas.style.left = `${Math.floor((window.innerWidth - size) / 2)}px`
-    this.canvas.style.top = `${Math.floor((window.innerHeight - size) / 2)}px`
+    this.canvas.style.left = `${Math.floor((vw - displayWidth) / 2)}px`
+    this.canvas.style.top = `${Math.floor((vh - displayHeight) / 2)}px`
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    this.cellSize = Math.floor(size / this.gridWidth)
+    this.cellSize = Math.floor(displayWidth / this.gridWidth)
   }
 
   clear(): void {

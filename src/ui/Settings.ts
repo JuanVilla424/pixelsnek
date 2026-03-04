@@ -36,7 +36,17 @@ export class SettingsManager {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) return { ...SETTINGS_DEFAULTS }
       const parsed = JSON.parse(raw) as Partial<Settings>
-      return { ...SETTINGS_DEFAULTS, ...parsed }
+      const merged = { ...SETTINGS_DEFAULTS, ...parsed }
+      return {
+        gridWidth: Math.min(30, Math.max(12, Math.floor(Number(merged.gridWidth)) || SETTINGS_DEFAULTS.gridWidth)),
+        gridHeight: Math.min(30, Math.max(12, Math.floor(Number(merged.gridHeight)) || SETTINGS_DEFAULTS.gridHeight)),
+        initialSpeed: Math.min(200, Math.max(50, Math.floor(Number(merged.initialSpeed)) || SETTINGS_DEFAULTS.initialSpeed)),
+        showGrid: Boolean(merged.showGrid),
+        showParticles: Boolean(merged.showParticles),
+        controlScheme: (['arrows', 'wasd', 'both'] as const).includes(merged.controlScheme as Settings['controlScheme'])
+          ? (merged.controlScheme as Settings['controlScheme'])
+          : SETTINGS_DEFAULTS.controlScheme,
+      }
     } catch {
       return { ...SETTINGS_DEFAULTS }
     }
