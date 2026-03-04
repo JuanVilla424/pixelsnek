@@ -321,6 +321,51 @@ describe('InputManager — controlScheme', () => {
   })
 })
 
+describe('InputManager — contextmenu prevention', () => {
+  it('prevents context menu on canvas', () => {
+    const canvas = makeCanvas()
+    const input = new InputManager(canvas)
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true })
+    canvas.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(true)
+    input.destroy()
+  })
+
+  it('after destroy, contextmenu is no longer prevented', () => {
+    const canvas = makeCanvas()
+    const input = new InputManager(canvas)
+    input.destroy()
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true })
+    canvas.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(false)
+  })
+})
+
+describe('InputManager — haptic feedback feature detection', () => {
+  it('navigator.vibrate is called with 10 on eat when available', () => {
+    const vibrate = vi.fn(() => true)
+    Object.defineProperty(navigator, 'vibrate', { value: vibrate, configurable: true })
+    if (navigator.vibrate) navigator.vibrate(10)
+    expect(vibrate).toHaveBeenCalledWith(10)
+  })
+
+  it('navigator.vibrate is called with pattern on death when available', () => {
+    const vibrate = vi.fn(() => true)
+    Object.defineProperty(navigator, 'vibrate', { value: vibrate, configurable: true })
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50])
+    expect(vibrate).toHaveBeenCalledWith([50, 50, 50])
+  })
+
+  it('no error when navigator.vibrate is undefined', () => {
+    const original = Object.getOwnPropertyDescriptor(navigator, 'vibrate')
+    Object.defineProperty(navigator, 'vibrate', { value: undefined, configurable: true })
+    expect(() => {
+      if (navigator.vibrate) navigator.vibrate(10)
+    }).not.toThrow()
+    if (original) Object.defineProperty(navigator, 'vibrate', original)
+  })
+})
+
 describe('InputManager — destroy', () => {
   it('after destroy, key events do not trigger callbacks', () => {
     const canvas = makeCanvas()

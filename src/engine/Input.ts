@@ -21,16 +21,19 @@ export class InputManager {
   private readonly boundKeyDown: (e: KeyboardEvent) => void
   private readonly boundTouchStart: (e: TouchEvent) => void
   private readonly boundTouchEnd: (e: TouchEvent) => void
+  private readonly boundContextMenu: (e: Event) => void
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
     this.boundKeyDown = this.handleKeyDown.bind(this)
     this.boundTouchStart = this.handleTouchStart.bind(this)
     this.boundTouchEnd = this.handleTouchEnd.bind(this)
+    this.boundContextMenu = (e: Event) => e.preventDefault()
 
     window.addEventListener('keydown', this.boundKeyDown)
     canvas.addEventListener('touchstart', this.boundTouchStart, { passive: false })
     canvas.addEventListener('touchend', this.boundTouchEnd, { passive: false })
+    canvas.addEventListener('contextmenu', this.boundContextMenu)
   }
 
   setOnDirectionChange(cb: DirectionCallback): void {
@@ -73,6 +76,7 @@ export class InputManager {
     window.removeEventListener('keydown', this.boundKeyDown)
     this.canvas.removeEventListener('touchstart', this.boundTouchStart)
     this.canvas.removeEventListener('touchend', this.boundTouchEnd)
+    this.canvas.removeEventListener('contextmenu', this.boundContextMenu)
   }
 
   private enqueueDirection(dir: Direction): void {

@@ -114,6 +114,50 @@ describe('Renderer.resize()', () => {
     expect(canvas.style.height).toBe('500px')
   })
 
+  it('portrait orientation: canvas size = innerWidth (narrower dimension)', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 375, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 812, configurable: true })
+
+    const { canvas } = makeRenderer()
+    // In portrait, innerWidth < innerHeight, so size = innerWidth
+    expect(canvas.style.width).toBe('375px')
+    expect(canvas.style.height).toBe('375px')
+  })
+
+  it('landscape orientation: canvas size = innerHeight (shorter dimension)', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 844, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 390, configurable: true })
+
+    const { canvas } = makeRenderer()
+    // In landscape, innerHeight < innerWidth, so size = innerHeight
+    expect(canvas.style.width).toBe('390px')
+    expect(canvas.style.height).toBe('390px')
+  })
+
+  it('landscape: canvas is centered horizontally via left offset', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 844, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 390, configurable: true })
+
+    const { canvas } = makeRenderer()
+    const size = 390
+    const expectedLeft = Math.floor((844 - size) / 2)
+    expect(canvas.style.left).toBe(`${expectedLeft}px`)
+  })
+
+  it('portrait: canvas is centered vertically via top offset', () => {
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true })
+    Object.defineProperty(window, 'innerWidth', { value: 375, configurable: true })
+    Object.defineProperty(window, 'innerHeight', { value: 812, configurable: true })
+
+    const { canvas } = makeRenderer()
+    const size = 375
+    const expectedTop = Math.floor((812 - size) / 2)
+    expect(canvas.style.top).toBe(`${expectedTop}px`)
+  })
+
   it('recomputes on window resize event', () => {
     Object.defineProperty(window, 'innerWidth', { value: 400, configurable: true })
     Object.defineProperty(window, 'innerHeight', { value: 400, configurable: true })
@@ -124,6 +168,54 @@ describe('Renderer.resize()', () => {
     Object.defineProperty(window, 'innerHeight', { value: 600, configurable: true })
     window.dispatchEvent(new Event('resize'))
     expect((ctx.setTransform as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(callsBefore)
+  })
+})
+
+describe('touch hint alpha decay', () => {
+  it('alpha is 1 at start (timestamp == touchHintStart)', () => {
+    const touchHintStart = 1000
+    const timestamp = 1000
+    const alpha = Math.max(0, 1 - (timestamp - touchHintStart) / 3000)
+    expect(alpha).toBe(1)
+  })
+
+  it('alpha is 0.5 at 1500ms', () => {
+    const touchHintStart = 0
+    const timestamp = 1500
+    const alpha = Math.max(0, 1 - (timestamp - touchHintStart) / 3000)
+    expect(alpha).toBeCloseTo(0.5)
+  })
+
+  it('alpha is 0 at 3000ms', () => {
+    const touchHintStart = 0
+    const timestamp = 3000
+    const alpha = Math.max(0, 1 - (timestamp - touchHintStart) / 3000)
+    expect(alpha).toBe(0)
+  })
+
+  it('alpha clamps to 0 after 3000ms', () => {
+    const touchHintStart = 0
+    const timestamp = 5000
+    const alpha = Math.max(0, 1 - (timestamp - touchHintStart) / 3000)
+    expect(alpha).toBe(0)
+  })
+
+  it('renderTouchHint is called in PLAYING state when touchHintAlpha > 0', () => {
+    const { renderer, ctx } = makeRenderer()
+    const game = new Game({ gridWidth: 20, gridHeight: 20 })
+    game.start()
+    renderer.render(game, [], 0.8)
+    const texts = (ctx.fillText as ReturnType<typeof vi.fn>).mock.calls.map((c: unknown[]) => c[0] as string)
+    expect(texts).toContain('Swipe to move')
+  })
+
+  it('renderTouchHint is NOT called when touchHintAlpha is 0', () => {
+    const { renderer, ctx } = makeRenderer()
+    const game = new Game({ gridWidth: 20, gridHeight: 20 })
+    game.start()
+    renderer.render(game, [], 0)
+    const texts = (ctx.fillText as ReturnType<typeof vi.fn>).mock.calls.map((c: unknown[]) => c[0] as string)
+    expect(texts).not.toContain('Swipe to move')
   })
 })
 
