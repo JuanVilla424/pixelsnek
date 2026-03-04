@@ -14,6 +14,7 @@ export class Renderer {
   private gridHeight: number
   private colors: ThemeColors
   private hud: HUD
+  private showGrid: boolean = true
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -124,6 +125,10 @@ export class Renderer {
     this.ctx.restore()
   }
 
+  setShowGrid(show: boolean): void {
+    this.showGrid = show
+  }
+
   getCellSize(): number {
     return this.cellSize
   }
@@ -142,7 +147,9 @@ export class Renderer {
   render(game: Game, particles: Particle[] = []): void {
     this.clear()
     this.renderBackground()
-    this.renderGrid()
+    if (this.showGrid) {
+      this.renderGrid()
+    }
     if (game.state !== GameState.MENU) {
       this.renderFood(game.food.getPosition())
       this.renderSnake(game.snake.getSegments())

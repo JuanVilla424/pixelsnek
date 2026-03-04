@@ -239,6 +239,35 @@ describe('Renderer.render()', () => {
   })
 })
 
+describe('Renderer.setShowGrid()', () => {
+  it('draws grid lines by default', () => {
+    const { renderer, ctx } = makeRenderer()
+    const game = new Game({ gridWidth: 20, gridHeight: 20 })
+    ;(ctx.lineTo as ReturnType<typeof vi.fn>).mockClear()
+    renderer.render(game)
+    expect((ctx.lineTo as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0)
+  })
+
+  it('does not draw grid lines when showGrid is false', () => {
+    const { renderer, ctx } = makeRenderer()
+    const game = new Game({ gridWidth: 20, gridHeight: 20 })
+    renderer.setShowGrid(false)
+    ;(ctx.lineTo as ReturnType<typeof vi.fn>).mockClear()
+    renderer.render(game)
+    expect((ctx.lineTo as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0)
+  })
+
+  it('resumes drawing grid lines after setShowGrid(true)', () => {
+    const { renderer, ctx } = makeRenderer()
+    const game = new Game({ gridWidth: 20, gridHeight: 20 })
+    renderer.setShowGrid(false)
+    renderer.setShowGrid(true)
+    ;(ctx.lineTo as ReturnType<typeof vi.fn>).mockClear()
+    renderer.render(game)
+    expect((ctx.lineTo as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThan(0)
+  })
+})
+
 describe('Renderer.renderParticles()', () => {
   it('renders particles without throwing', () => {
     const { renderer } = makeRenderer()

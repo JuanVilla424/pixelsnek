@@ -16,6 +16,7 @@ export class InputManager {
   private onLeaderboardCb: VoidCallback | null = null
   private onClearLeaderboardCb: VoidCallback | null = null
   private touchStart: { x: number; y: number } | null = null
+  private controlScheme: 'arrows' | 'wasd' | 'both' = 'both'
 
   private readonly boundKeyDown: (e: KeyboardEvent) => void
   private readonly boundTouchStart: (e: TouchEvent) => void
@@ -52,6 +53,10 @@ export class InputManager {
     this.onClearLeaderboardCb = cb
   }
 
+  setControlScheme(scheme: 'arrows' | 'wasd' | 'both'): void {
+    this.controlScheme = scheme
+  }
+
   setCurrentDirection(dir: Direction): void {
     this.currentDirection = dir
   }
@@ -84,25 +89,46 @@ export class InputManager {
 
   private handleKeyDown(event: KeyboardEvent): void {
     const key = event.key.toLowerCase()
+    const scheme = this.controlScheme
 
     switch (key) {
       case 'arrowup':
+        if (scheme === 'wasd') break
+        event.preventDefault()
+        this.enqueueDirection(Direction.Up)
+        break
       case 'w':
+        if (scheme === 'arrows') break
         event.preventDefault()
         this.enqueueDirection(Direction.Up)
         break
       case 'arrowdown':
+        if (scheme === 'wasd') break
+        event.preventDefault()
+        this.enqueueDirection(Direction.Down)
+        break
       case 's':
+        if (scheme === 'arrows') break
         event.preventDefault()
         this.enqueueDirection(Direction.Down)
         break
       case 'arrowleft':
+        if (scheme === 'wasd') break
+        event.preventDefault()
+        this.enqueueDirection(Direction.Left)
+        break
       case 'a':
+        if (scheme === 'arrows') break
         event.preventDefault()
         this.enqueueDirection(Direction.Left)
         break
       case 'arrowright':
+        if (scheme === 'wasd') break
+        event.preventDefault()
+        this.enqueueDirection(Direction.Right)
+        break
       case 'd':
+        if (scheme === 'arrows') break
         event.preventDefault()
         this.enqueueDirection(Direction.Right)
         break

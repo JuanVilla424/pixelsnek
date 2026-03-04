@@ -193,6 +193,30 @@ describe('ParticleSystem.clear()', () => {
   })
 })
 
+describe('ParticleSystem.setEnabled()', () => {
+  it('does not add particles when disabled', () => {
+    const ps = new ParticleSystem()
+    ps.setEnabled(false)
+    ps.emit(0, 0, 10, BASE_CONFIG)
+    expect(ps.getParticles()).toHaveLength(0)
+  })
+
+  it('adds particles when enabled (default)', () => {
+    const ps = new ParticleSystem()
+    ps.emit(0, 0, 5, BASE_CONFIG)
+    expect(ps.getParticles()).toHaveLength(5)
+  })
+
+  it('resumes adding particles after re-enabling', () => {
+    const ps = new ParticleSystem()
+    ps.setEnabled(false)
+    ps.emit(0, 0, 5, BASE_CONFIG)
+    ps.setEnabled(true)
+    ps.emit(0, 0, 3, BASE_CONFIG)
+    expect(ps.getParticles()).toHaveLength(3)
+  })
+})
+
 describe('EAT_CONFIG', () => {
   it('has no gravity (eat burst floats freely)', () => {
     expect(EAT_CONFIG.gravity ?? 0).toBe(0)

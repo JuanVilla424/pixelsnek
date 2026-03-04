@@ -254,6 +254,73 @@ describe('InputManager — touch swipe', () => {
   })
 })
 
+describe('InputManager — controlScheme', () => {
+  let canvas: HTMLCanvasElement
+  let input: InputManager
+  let received: Direction[]
+
+  beforeEach(() => {
+    canvas = makeCanvas()
+    input = new InputManager(canvas)
+    received = []
+    input.setOnDirectionChange((dir) => received.push(dir))
+  })
+
+  afterEach(() => {
+    input.destroy()
+  })
+
+  it('arrows scheme: arrow keys work', () => {
+    input.setControlScheme('arrows')
+    fireKey('ArrowUp')
+    expect(received).toEqual([Direction.Up])
+  })
+
+  it('arrows scheme: WASD keys are ignored', () => {
+    input.setControlScheme('arrows')
+    fireKey('w')
+    fireKey('a')
+    fireKey('s')
+    fireKey('d')
+    expect(received).toHaveLength(0)
+  })
+
+  it('wasd scheme: WASD keys work', () => {
+    input.setControlScheme('wasd')
+    fireKey('w')
+    expect(received).toEqual([Direction.Up])
+  })
+
+  it('wasd scheme: arrow keys are ignored', () => {
+    input.setControlScheme('wasd')
+    fireKey('ArrowUp')
+    fireKey('ArrowDown')
+    fireKey('ArrowLeft')
+    fireKey('ArrowRight')
+    expect(received).toHaveLength(0)
+  })
+
+  it('both scheme: arrow keys work', () => {
+    input.setControlScheme('both')
+    fireKey('ArrowDown')
+    expect(received).toEqual([Direction.Down])
+  })
+
+  it('both scheme: WASD keys work', () => {
+    input.setControlScheme('both')
+    fireKey('s')
+    expect(received).toEqual([Direction.Down])
+  })
+
+  it('default scheme is both (accepts all keys)', () => {
+    // no setControlScheme call — default
+    fireKey('ArrowLeft')
+    received.length = 0
+    fireKey('a')
+    expect(received).toHaveLength(1)
+  })
+})
+
 describe('InputManager — destroy', () => {
   it('after destroy, key events do not trigger callbacks', () => {
     const canvas = makeCanvas()
