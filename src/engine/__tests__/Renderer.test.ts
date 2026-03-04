@@ -179,8 +179,8 @@ describe('Renderer.renderParticles()', () => {
   it('renders particles without throwing', () => {
     const { renderer } = makeRenderer()
     const particles = [
-      { x: 100, y: 100, vx: 1, vy: -1, color: '#ff0000', alpha: 0.8, lifetime: 30, maxLifetime: 60 },
-      { x: 200, y: 150, vx: -1, vy: 1, color: '#00ff00', alpha: 0.5, lifetime: 10, maxLifetime: 60 },
+      { x: 100, y: 100, vx: 1, vy: -1, radius: 3, color: '#ff0000', alpha: 0.8, lifetime: 30, maxLifetime: 60, gravity: 0.1 },
+      { x: 200, y: 150, vx: -1, vy: 1, radius: 3, color: '#00ff00', alpha: 0.5, lifetime: 10, maxLifetime: 60, gravity: 0.1 },
     ]
     expect(() => renderer.renderParticles(particles)).not.toThrow()
   })
@@ -188,8 +188,8 @@ describe('Renderer.renderParticles()', () => {
   it('draws one arc per particle', () => {
     const { renderer, ctx } = makeRenderer()
     const particles = [
-      { x: 10, y: 10, vx: 0, vy: 0, color: '#fff', alpha: 1, lifetime: 30, maxLifetime: 60 },
-      { x: 20, y: 20, vx: 0, vy: 0, color: '#fff', alpha: 1, lifetime: 30, maxLifetime: 60 },
+      { x: 10, y: 10, vx: 0, vy: 0, radius: 3, color: '#fff', alpha: 1, lifetime: 30, maxLifetime: 60, gravity: 0 },
+      { x: 20, y: 20, vx: 0, vy: 0, radius: 3, color: '#fff', alpha: 1, lifetime: 30, maxLifetime: 60, gravity: 0 },
     ]
     renderer.renderParticles(particles)
     expect((ctx.arc as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(2)
@@ -198,7 +198,7 @@ describe('Renderer.renderParticles()', () => {
   it('resets globalAlpha to 1 after rendering particles', () => {
     const { renderer, ctx } = makeRenderer()
     const particles = [
-      { x: 10, y: 10, vx: 0, vy: 0, color: '#fff', alpha: 0.5, lifetime: 20, maxLifetime: 60 },
+      { x: 10, y: 10, vx: 0, vy: 0, radius: 3, color: '#fff', alpha: 0.5, lifetime: 20, maxLifetime: 60, gravity: 0 },
     ]
     renderer.renderParticles(particles)
     expect(ctx.globalAlpha).toBe(1)

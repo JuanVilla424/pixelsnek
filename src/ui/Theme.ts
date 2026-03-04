@@ -46,7 +46,12 @@ export const LIGHT: ThemeColors = {
   buttonHover: '#cbd5e1',
 }
 
-type ThemeSetting = 'dark' | 'light' | 'system'
+export type ThemePreference = 'dark' | 'light' | 'system'
+
+type ThemeSetting = ThemePreference
+
+export const DARK_THEME: ThemeColors = DARK
+export const LIGHT_THEME: ThemeColors = LIGHT
 
 const STORAGE_KEY = 'pixelsnek-theme'
 
