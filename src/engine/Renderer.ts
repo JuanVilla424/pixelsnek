@@ -129,6 +129,12 @@ export class Renderer {
     this.showGrid = show
   }
 
+  setGridSize(width: number, height: number): void {
+    this.gridWidth = width
+    this.gridHeight = height
+    this.resize()
+  }
+
   getCellSize(): number {
     return this.cellSize
   }

@@ -3,9 +3,10 @@ import { InputManager } from './engine/Input'
 import { Renderer } from './engine/Renderer'
 import { ParticleSystem } from './engine/Particles'
 import { Game } from './game/Game'
-import { Direction, GameState } from './game/types'
+import { Direction, GameState, GameCallbacks } from './game/types'
 import { ThemeManager, createThemeToggle } from './ui/Theme'
 import { Leaderboard } from './ui/Leaderboard'
+import { SettingsManager, SettingsPanel } from './ui/Settings'
 
 const canvas = document.getElementById('game-canvas') as HTMLCanvasElement | null
 
@@ -16,12 +17,16 @@ if (!canvas) {
 const themeManager = new ThemeManager()
 createThemeToggle(themeManager)
 
-const GRID_WIDTH = 20
-const GRID_HEIGHT = 20
+const settingsManager = new SettingsManager()
+const initialSettings = settingsManager.get()
 
-const renderer = new Renderer(canvas, GRID_WIDTH, GRID_HEIGHT, themeManager)
+const renderer = new Renderer(canvas, initialSettings.gridWidth, initialSettings.gridHeight, themeManager)
 const particleSystem = new ParticleSystem()
 const leaderboard = new Leaderboard()
+const settingsPanel = new SettingsPanel()
+
+renderer.setShowGrid(initialSettings.showGrid)
+particleSystem.setEnabled(initialSettings.showParticles)
 
 let leaderboardVisible = false
 let leaderboardHighlightIndex: number | undefined = undefined
@@ -46,9 +51,11 @@ function hideLeaderboard(): void {
 
 const storedHighScore = parseInt(localStorage.getItem('pixelsnek-highscore') ?? '0', 10)
 
-const game = new Game(
-  { gridWidth: GRID_WIDTH, gridHeight: GRID_HEIGHT },
-  {
+// game is declared before callbacks so closures capture the binding
+let game!: Game
+
+function makeCallbacks(): GameCallbacks {
+  return {
     onEat: (headPos) => {
       const cs = renderer.getCellSize()
       const colors = themeManager.getColors()
@@ -85,7 +92,7 @@ const game = new Game(
           localStorage.setItem('pixelsnek-highscore', String(game.highScore))
         }
         if (leaderboard.isHighScore(game.score)) {
-          leaderboard.showNameInput(canvas, themeManager.getColors(), (name) => {
+          leaderboard.showNameInput(canvas!, themeManager.getColors(), (name) => {
             const entry = {
               name,
               score: game.score,
@@ -105,18 +112,24 @@ const game = new Game(
         leaderboard.hideNameInput()
       }
     },
-  },
-)
+  }
+}
 
+game = new Game(
+  { gridWidth: initialSettings.gridWidth, gridHeight: initialSettings.gridHeight, initialSpeed: initialSettings.initialSpeed },
+  makeCallbacks(),
+)
 game.highScore = isNaN(storedHighScore) ? 0 : storedHighScore
 
 const input = new InputManager(canvas)
+input.setControlScheme(initialSettings.controlScheme)
 
 input.setOnDirectionChange((dir: Direction) => {
   game.snake.setDirection(dir)
 })
 
 input.setOnPause(() => {
+  if (settingsPanel.isOpen()) return
   if (game.state === GameState.MENU || game.state === GameState.GAME_OVER) {
     if (!leaderboardVisible) {
       game.start()
@@ -129,6 +142,10 @@ input.setOnPause(() => {
 })
 
 input.setOnEscape(() => {
+  if (settingsPanel.isOpen()) {
+    settingsPanel.close()
+    return
+  }
   if (leaderboardVisible) {
     hideLeaderboard()
     return
@@ -166,6 +183,33 @@ input.setOnClearLeaderboard(() => {
     }, 3000)
   }
 })
+
+// Gear icon settings button
+const gearBtn = document.createElement('button')
+gearBtn.id = 'settings-btn'
+gearBtn.setAttribute('aria-label', 'Settings')
+gearBtn.textContent = '⚙️'
+gearBtn.addEventListener('click', () => {
+  if (settingsPanel.isOpen()) return
+  if (game.state !== GameState.MENU && game.state !== GameState.PAUSED) return
+  settingsPanel.open(settingsManager.get(), {
+    onApply: (newSettings) => {
+      settingsManager.update(newSettings)
+      renderer.setGridSize(newSettings.gridWidth, newSettings.gridHeight)
+      renderer.setShowGrid(newSettings.showGrid)
+      particleSystem.setEnabled(newSettings.showParticles)
+      input.setControlScheme(newSettings.controlScheme)
+      const prevHighScore = game.highScore
+      game = new Game(
+        { gridWidth: newSettings.gridWidth, gridHeight: newSettings.gridHeight, initialSpeed: newSettings.initialSpeed },
+        makeCallbacks(),
+      )
+      game.highScore = isNaN(prevHighScore) ? 0 : prevHighScore
+    },
+    onClose: () => {},
+  })
+})
+document.body.appendChild(gearBtn)
 
 let lastTick = 0
 let lastTime = 0
