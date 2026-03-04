@@ -121,7 +121,7 @@ export class Game {
     if (this.score > this.highScore) {
       this.highScore = this.score
     }
-    this.callbacks.onDeath?.(this.snake.getHead())
+    this.callbacks.onDeath?.(this.snake.getSegments())
     this._setState(GameState.GAME_OVER)
   }
 

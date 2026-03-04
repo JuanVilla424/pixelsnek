@@ -36,7 +36,7 @@ export interface GameCallbacks {
   onScoreChange?: (score: number) => void
   onLevelChange?: (level: number) => void
   onEat?: (position: Position) => void
-  onDeath?: (position: Position) => void
+  onDeath?: (segments: Position[]) => void
   onStateChange?: (state: GameState) => void
 }
 

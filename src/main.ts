@@ -60,10 +60,10 @@ const game = new Game(
         radiusMax: 4,
       })
     },
-    onDeath: () => {
+    onDeath: (segments) => {
       const cs = renderer.getCellSize()
       const colors = themeManager.getColors()
-      for (const seg of game.snake.getSegments()) {
+      for (const seg of segments) {
         particleSystem.emit(seg.x * cs + cs / 2, seg.y * cs + cs / 2, 3 + Math.floor(Math.random() * 3), {
           color: colors.snakeBody,
           speedMin: 1,
