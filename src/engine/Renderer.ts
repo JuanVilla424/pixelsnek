@@ -135,14 +135,14 @@ export class Renderer {
     this.ctx.globalAlpha = 1
   }
 
-  render(game: Game): void {
+  render(game: Game, particles: Particle[] = []): void {
     this.clear()
     this.renderBackground()
     this.renderGrid()
     if (game.state !== GameState.MENU) {
       this.renderFood(game.food.getPosition())
       this.renderSnake(game.snake.getSegments())
-      this.renderParticles(game.particles)
+      this.renderParticles(particles)
     }
     if (game.state === GameState.PAUSED) {
       this._renderOverlay('PAUSED')

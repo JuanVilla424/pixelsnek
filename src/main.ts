@@ -98,8 +98,7 @@ function loop(timestamp: number): void {
   }
 
   particleSystem.update(dt)
-  game.particles = particleSystem.getParticles()
-  renderer.render(game)
+  renderer.render(game, particleSystem.getParticles())
   requestAnimationFrame(loop)
 }
 

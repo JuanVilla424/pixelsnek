@@ -1,4 +1,4 @@
-import { GameState, GameConfig, GameCallbacks, Direction, Position, Particle } from './types'
+import { GameState, GameConfig, GameCallbacks, Direction, Position } from './types'
 import { Grid } from './Grid'
 import { Snake } from './Snake'
 import { Food } from './Food'
@@ -27,7 +27,6 @@ export class Game {
   score: number
   level: number
   highScore: number
-  particles: Particle[]
 
   private config: GameConfig
   private callbacks: GameCallbacks
@@ -42,13 +41,11 @@ export class Game {
     this.score = 0
     this.level = 1
     this.highScore = 0
-    this.particles = []
   }
 
   start(): void {
     this.score = 0
     this.level = 1
-    this.particles = []
     const centerX = Math.floor(this.config.gridWidth / 2)
     const centerY = Math.floor(this.config.gridHeight / 2)
     this.snake = new Snake(centerX, centerY, 3)
