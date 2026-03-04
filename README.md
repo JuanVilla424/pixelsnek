@@ -4,7 +4,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
 [![Version](https://img.shields.io/github/v/tag/JuanVilla424/pixelsnek?label=Version&color=blue)](VERSIONING.md)
 [![Build](https://img.shields.io/github/actions/workflow/status/JuanVilla424/pixelsnek/ci.yml?branch=dev&label=Build)](https://github.com/JuanVilla424/pixelsnek/actions)
-[![Status](https://img.shields.io/badge/Status-Active-green.svg)]()
+[![Status](https://img.shields.io/badge/Status-Active-green.svg)](https://github.com/JuanVilla424/pixelsnek)
 [![License](https://img.shields.io/badge/License-GPLv3-purple.svg)](LICENSE)
 
 A classic snake game built with vanilla TypeScript and the Canvas 2D API — no runtime dependencies, no frameworks, just pure browser technology. Guide your pixel snake to eat food, grow longer, and chase the high score without hitting a wall or yourself.
