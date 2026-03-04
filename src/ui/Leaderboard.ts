@@ -17,16 +17,34 @@ export class Leaderboard {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) return []
-      const parsed = JSON.parse(raw) as LeaderboardEntry[]
-      return parsed.sort((a, b) => b.score - a.score).slice(0, MAX_ENTRIES)
+      const parsed: unknown = JSON.parse(raw)
+      if (!Array.isArray(parsed)) return []
+      const entries: LeaderboardEntry[] = parsed
+        .filter(
+          (e): e is Record<string, unknown> =>
+            typeof e === 'object' && e !== null && !Array.isArray(e),
+        )
+        .map((e) => ({
+          name: String(e['name'] ?? 'Player').replace(/[\x00-\x1f\x7f]/g, '').slice(0, 20) || 'Player',
+          score: Math.max(0, Math.floor(Number(e['score']) || 0)),
+          level: Math.max(1, Math.floor(Number(e['level']) || 1)),
+          date: typeof e['date'] === 'string' && !isNaN(Date.parse(e['date'] as string)) ? (e['date'] as string) : new Date().toISOString(),
+        }))
+      return entries.sort((a, b) => b.score - a.score).slice(0, MAX_ENTRIES)
     } catch {
       return []
     }
   }
 
   addEntry(entry: LeaderboardEntry): void {
+    const sanitized: LeaderboardEntry = {
+      name: String(entry.name ?? 'Player').replace(/[\x00-\x1f\x7f]/g, '').slice(0, 20) || 'Player',
+      score: Math.max(0, Math.floor(Number(entry.score) || 0)),
+      level: Math.max(1, Math.floor(Number(entry.level) || 1)),
+      date: typeof entry.date === 'string' && !isNaN(Date.parse(entry.date)) ? entry.date : new Date().toISOString(),
+    }
     const entries = this.getEntries()
-    entries.push(entry)
+    entries.push(sanitized)
     const sorted = entries.sort((a, b) => b.score - a.score).slice(0, MAX_ENTRIES)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sorted))
   }
