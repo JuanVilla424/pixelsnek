@@ -1,6 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Game } from '../../game/Game'
 import { Renderer } from '../Renderer'
+import { DARK, ThemeColors, ThemeManager } from '../../ui/Theme'
+
+function makeMockThemeManager(): ThemeManager {
+  return {
+    getColors: vi.fn((): ThemeColors => DARK),
+    getSetting: vi.fn(() => 'dark' as const),
+    getPreference: vi.fn(() => 'dark' as const),
+    toggle: vi.fn(),
+    onChange: vi.fn(),
+    destroy: vi.fn(),
+  } as unknown as ThemeManager
+}
 
 function makeMockCtx(): CanvasRenderingContext2D {
   return {
@@ -38,12 +50,16 @@ function makeCanvas(): HTMLCanvasElement {
   return canvas
 }
 
-function makeRenderer(gridWidth = 20, gridHeight = 20): { renderer: Renderer; ctx: CanvasRenderingContext2D; canvas: HTMLCanvasElement } {
+function makeRenderer(
+  gridWidth = 20,
+  gridHeight = 20,
+): { renderer: Renderer; ctx: CanvasRenderingContext2D; canvas: HTMLCanvasElement; themeManager: ThemeManager } {
   const canvas = makeCanvas()
   const ctx = makeMockCtx()
   vi.spyOn(canvas, 'getContext').mockReturnValue(ctx)
-  const renderer = new Renderer(canvas, gridWidth, gridHeight)
-  return { renderer, ctx, canvas }
+  const themeManager = makeMockThemeManager()
+  const renderer = new Renderer(canvas, gridWidth, gridHeight, themeManager)
+  return { renderer, ctx, canvas, themeManager }
 }
 
 describe('Renderer constructor', () => {
@@ -61,6 +77,16 @@ describe('Renderer constructor', () => {
   it('calls setTransform on construction for HiDPI scaling', () => {
     const { ctx } = makeRenderer()
     expect(ctx.setTransform).toHaveBeenCalled()
+  })
+
+  it('calls themeManager.getColors() during construction', () => {
+    const { themeManager } = makeRenderer()
+    expect(themeManager.getColors).toHaveBeenCalled()
+  })
+
+  it('registers onChange listener with themeManager', () => {
+    const { themeManager } = makeRenderer()
+    expect(themeManager.onChange).toHaveBeenCalledWith(expect.any(Function))
   })
 })
 

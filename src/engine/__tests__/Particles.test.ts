@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ParticleSystem } from '../Particles'
+import { ParticleSystem, EAT_CONFIG, DEATH_CONFIG } from '../Particles'
 
 const BASE_CONFIG = {
   color: '#ff0000',
@@ -175,5 +175,57 @@ describe('ParticleSystem.update()', () => {
       expect(after[i].x).toBeCloseTo(before[i].x, 5)
       expect(after[i].y).toBeCloseTo(before[i].y, 5)
     }
+  })
+})
+
+describe('ParticleSystem.clear()', () => {
+  it('empties the particles array', () => {
+    const ps = new ParticleSystem()
+    ps.emit(0, 0, 10, BASE_CONFIG)
+    ps.clear()
+    expect(ps.getParticles()).toHaveLength(0)
+  })
+
+  it('is idempotent on an already-empty system', () => {
+    const ps = new ParticleSystem()
+    expect(() => ps.clear()).not.toThrow()
+    expect(ps.getParticles()).toHaveLength(0)
+  })
+})
+
+describe('EAT_CONFIG', () => {
+  it('has no gravity (eat burst floats freely)', () => {
+    expect(EAT_CONFIG.gravity ?? 0).toBe(0)
+  })
+
+  it('speed range covers 2–5', () => {
+    expect(EAT_CONFIG.speedMin).toBe(2)
+    expect(EAT_CONFIG.speedMax).toBe(5)
+  })
+
+  it('life range is within 0.4–0.8s', () => {
+    expect(EAT_CONFIG.lifeMin).toBeGreaterThanOrEqual(0.4)
+    expect(EAT_CONFIG.lifeMax).toBeLessThanOrEqual(0.8)
+  })
+
+  it('radius range is within 2–4', () => {
+    expect(EAT_CONFIG.radiusMin).toBeGreaterThanOrEqual(2)
+    expect(EAT_CONFIG.radiusMax).toBeLessThanOrEqual(4)
+  })
+})
+
+describe('DEATH_CONFIG', () => {
+  it('has gravity enabled for falling effect', () => {
+    expect(DEATH_CONFIG.gravity).toBeGreaterThan(0)
+  })
+
+  it('life range is within 0.6–1.2s', () => {
+    expect(DEATH_CONFIG.lifeMin).toBeGreaterThanOrEqual(0.6)
+    expect(DEATH_CONFIG.lifeMax).toBeLessThanOrEqual(1.2)
+  })
+
+  it('radius range is within 2–6', () => {
+    expect(DEATH_CONFIG.radiusMin).toBeGreaterThanOrEqual(2)
+    expect(DEATH_CONFIG.radiusMax).toBeLessThanOrEqual(6)
   })
 })
