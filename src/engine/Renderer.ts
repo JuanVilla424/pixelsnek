@@ -1,14 +1,6 @@
 import { Game } from '../game/Game'
 import { GameState, Particle, Position } from '../game/types'
-
-const THEME = {
-  background: '#0d1117',
-  grid: 'rgba(255,255,255,0.05)',
-  snakeBody: '#3fb950',
-  snakeHead: '#58d68d',
-  food: '#f85149',
-  foodGlow: '#ff6b6b',
-}
+import { ThemeColors, ThemeManager, DARK } from '../ui/Theme'
 
 export class Renderer {
   private canvas: HTMLCanvasElement
@@ -18,11 +10,23 @@ export class Renderer {
   private cellSize: number = 0
   private gridWidth: number
   private gridHeight: number
+  private colors: ThemeColors
 
-  constructor(canvas: HTMLCanvasElement, gridWidth: number = 20, gridHeight: number = 20) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    gridWidth: number = 20,
+    gridHeight: number = 20,
+    themeManager: ThemeManager | null = null,
+  ) {
     this.canvas = canvas
     this.gridWidth = gridWidth
     this.gridHeight = gridHeight
+    this.colors = themeManager ? themeManager.getColors() : DARK
+    if (themeManager) {
+      themeManager.onChange((colors) => {
+        this.colors = colors
+      })
+    }
     const ctx = canvas.getContext('2d')
     if (!ctx) throw new Error('Failed to get 2D context')
     this.ctx = ctx
@@ -51,12 +55,12 @@ export class Renderer {
   }
 
   renderBackground(): void {
-    this.ctx.fillStyle = THEME.background
+    this.ctx.fillStyle = this.colors.background
     this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight)
   }
 
   renderGrid(): void {
-    this.ctx.strokeStyle = THEME.grid
+    this.ctx.strokeStyle = this.colors.gridLine
     this.ctx.lineWidth = 1
     for (let x = 0; x <= this.gridWidth; x++) {
       const px = x * this.cellSize
@@ -83,7 +87,7 @@ export class Renderer {
       const x = seg.x * this.cellSize + gap
       const y = seg.y * this.cellSize + gap
       const size = this.cellSize - gap * 2
-      this.ctx.fillStyle = isHead ? THEME.snakeHead : THEME.snakeBody
+      this.ctx.fillStyle = isHead ? this.colors.snakeHead : this.colors.snakeBody
       this.ctx.beginPath()
       this.ctx.roundRect(x, y, size, size, radius)
       this.ctx.fill()
@@ -91,7 +95,7 @@ export class Renderer {
         const eyeRadius = Math.max(1.5, size * 0.1)
         const eyeOffsetX = size * 0.25
         const eyeY = y + size * 0.3
-        this.ctx.fillStyle = THEME.background
+        this.ctx.fillStyle = this.colors.background
         this.ctx.beginPath()
         this.ctx.arc(x + eyeOffsetX, eyeY, eyeRadius, 0, Math.PI * 2)
         this.ctx.fill()
@@ -108,8 +112,8 @@ export class Renderer {
     const radius = this.cellSize * 0.35
     this.ctx.save()
     this.ctx.shadowBlur = 12
-    this.ctx.shadowColor = THEME.foodGlow
-    this.ctx.fillStyle = THEME.food
+    this.ctx.shadowColor = this.colors.foodGlow
+    this.ctx.fillStyle = this.colors.food
     this.ctx.beginPath()
     this.ctx.arc(cx, cy, radius, 0, Math.PI * 2)
     this.ctx.fill()
