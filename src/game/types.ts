@@ -50,3 +50,14 @@ export interface Particle {
   lifetime: number
   maxLifetime: number
 }
+
+export interface GameSnapshot {
+  segments: Position[]
+  food: Position
+  direction: Direction
+  score: number
+  gameOver: boolean
+  gridWidth: number
+  gridHeight: number
+  particles: Particle[]
+}
