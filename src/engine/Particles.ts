@@ -13,8 +13,14 @@ export interface EmitConfig {
 
 export class ParticleSystem {
   private particles: Particle[] = []
+  private enabled: boolean = true
+
+  setEnabled(enabled: boolean): void {
+    this.enabled = enabled
+  }
 
   emit(x: number, y: number, count: number, config: EmitConfig): void {
+    if (!this.enabled) return
     const gravity = config.gravity ?? 0
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2

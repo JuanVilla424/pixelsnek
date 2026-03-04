@@ -72,7 +72,6 @@ describe('HUD.renderHUD()', () => {
   })
 
   it('sets font to 16px monospace for score', () => {
-    const fontCalls = (ctx as unknown as { font: string })
     // font is set as property — check via calls inspection through fillText order
     // The font for score is set before the first fillText call
     const calls = (ctx.fillText as ReturnType<typeof vi.fn>).mock.calls
