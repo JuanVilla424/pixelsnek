@@ -9,6 +9,8 @@
 
 A classic snake game built with vanilla TypeScript and the Canvas 2D API — no runtime dependencies, no frameworks, just pure browser technology. Guide your pixel snake to eat food, grow longer, and chase the high score without hitting a wall or yourself.
 
+**Live demo:** https://juanvilla424.github.io/pixelsnek/
+
 ## 📋 Table of Contents
 
 - [✨ Features](#-features)
