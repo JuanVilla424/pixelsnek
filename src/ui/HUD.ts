@@ -147,6 +147,18 @@ export class HUD {
     ctx.restore()
   }
 
+  renderTouchHint(displayWidth: number, displayHeight: number, alpha: number, colors: ThemeColors): void {
+    const ctx = this.ctx
+    ctx.save()
+    ctx.globalAlpha = alpha * 0.75
+    ctx.fillStyle = colors.text
+    ctx.font = '18px monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('Swipe to move', displayWidth / 2, displayHeight / 2)
+    ctx.restore()
+  }
+
   private _renderSnakeIcon(cx: number, cy: number, colors: ThemeColors): void {
     const ctx = this.ctx
     const size = 10

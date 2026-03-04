@@ -40,17 +40,16 @@ pixelsnek/
 ## 🔄 Data Flow
 
 ```
-User Input (keyboard)
+User Input (keyboard/touch)
     ↓
-InputHandler (src/engine/)
+InputManager (src/engine/Input.ts)
     ↓
 Game State (src/game/) — snake position, direction, score, food
     ↓
-Renderer (src/engine/) — draws to Canvas 2D context
-    ↓
-ParticleSystem (src/engine/) — visual effects on eat/death
-    ↓
-HUD (src/ui/) — overlays score, level, game over screen
+Renderer (src/engine/Renderer.ts) — draws to Canvas 2D context
+    ├── HUD (src/ui/HUD.ts) — overlays score, level, game over screen
+    ├── Leaderboard (src/ui/Leaderboard.ts) — score history panel
+    └── ParticleSystem (src/engine/Particles.ts) — visual effects on eat/death
 ```
 
 ## 🧩 Design Decisions
@@ -65,3 +64,6 @@ HUD (src/ui/) — overlays score, level, game over screen
 | State management     | Explicit parameters | No global state — functions receive and return state |
 | Branch strategy      | dev → main          | Trunk-based development with stable main branch      |
 | License              | GPLv3               | Standard open-source license                         |
+| Theme                | CSS vars + canvas   | OS preference detection, toggle, persisted setting   |
+| Settings             | localStorage        | Grid size, speed, particles, controls — persisted    |
+| Leaderboard          | localStorage        | Top 10 scores with name entry, date, level           |

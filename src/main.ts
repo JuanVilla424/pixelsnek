@@ -68,6 +68,7 @@ function makeCallbacks(): GameCallbacks {
         radiusMin: 2,
         radiusMax: 4,
       })
+      if (navigator.vibrate) navigator.vibrate(10)
     },
     onDeath: (segments) => {
       const cs = renderer.getCellSize()
@@ -84,6 +85,7 @@ function makeCallbacks(): GameCallbacks {
           gravity: 50,
         })
       }
+      if (navigator.vibrate) navigator.vibrate([50, 50, 50])
     },
     onStateChange: (state) => {
       if (state === GameState.GAME_OVER) {
@@ -133,6 +135,10 @@ input.setOnPause(() => {
   if (game.state === GameState.MENU || game.state === GameState.GAME_OVER) {
     if (!leaderboardVisible) {
       game.start()
+      if (isTouchDevice && !touchHintShown) {
+        touchHintStart = performance.now()
+        touchHintShown = true
+      }
     }
   } else if (game.state === GameState.PLAYING) {
     game.pause()
@@ -211,6 +217,10 @@ gearBtn.addEventListener('click', () => {
 })
 document.body.appendChild(gearBtn)
 
+const isTouchDevice = 'ontouchstart' in window
+let touchHintStart: number | null = null
+let touchHintShown = false
+
 let lastTick = 0
 let lastTime = 0
 
@@ -225,7 +235,9 @@ function loop(timestamp: number): void {
   }
 
   particleSystem.update(dt)
-  renderer.render(game, particleSystem.getParticles())
+  const touchHintAlpha =
+    touchHintStart !== null ? Math.max(0, 1 - (timestamp - touchHintStart) / 3000) : 0
+  renderer.render(game, particleSystem.getParticles(), touchHintAlpha)
   if (leaderboardVisible) {
     renderer.renderLeaderboard(leaderboard, leaderboardHighlightIndex, clearConfirmPending)
   }

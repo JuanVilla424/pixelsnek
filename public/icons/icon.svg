@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" fill="#0a0a0f" rx="24"/>
+  <!-- Snake body segments (pixel art style) -->
+  <!-- Head -->
+  <rect x="100" y="76" width="20" height="20" fill="#22c55e" rx="3"/>
+  <!-- Eyes -->
+  <rect x="104" y="80" width="4" height="4" fill="#0a0a0f" rx="1"/>
+  <rect x="112" y="80" width="4" height="4" fill="#0a0a0f" rx="1"/>
+  <!-- Body segments -->
+  <rect x="80" y="76" width="20" height="20" fill="#16a34a" rx="3"/>
+  <rect x="60" y="76" width="20" height="20" fill="#15803d" rx="3"/>
+  <rect x="60" y="96" width="20" height="20" fill="#166534" rx="3"/>
+  <rect x="60" y="116" width="20" height="20" fill="#14532d" rx="3"/>
+  <!-- Food (red apple pixel) -->
+  <rect x="120" y="116" width="16" height="16" fill="#ef4444" rx="2"/>
+  <rect x="126" y="112" width="4" height="4" fill="#22c55e" rx="1"/>
+</svg>

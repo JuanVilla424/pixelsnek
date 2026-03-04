@@ -1,0 +1,31 @@
+{
+  "name": "PixelSnek",
+  "short_name": "PixelSnek",
+  "description": "Classic snake game — Canvas 2D, no dependencies",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0a0a0f",
+  "background_color": "#0a0a0f",
+  "start_url": "/pixelsnek/",
+  "scope": "/pixelsnek/",
+  "icons": [
+    {
+      "src": "/pixelsnek/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pixelsnek/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pixelsnek/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

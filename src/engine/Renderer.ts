@@ -150,7 +150,7 @@ export class Renderer {
     this.ctx.globalAlpha = 1
   }
 
-  render(game: Game, particles: Particle[] = []): void {
+  render(game: Game, particles: Particle[] = [], touchHintAlpha: number = 0): void {
     this.clear()
     this.renderBackground()
     if (this.showGrid) {
@@ -165,6 +165,9 @@ export class Renderer {
       this.hud.renderMenu(this.displayWidth, this.displayHeight, game.highScore, this.colors)
     } else if (game.state === GameState.PLAYING) {
       this.hud.renderHUD(this.displayWidth, game.score, game.level, game.highScore, this.colors)
+      if (touchHintAlpha > 0) {
+        this.hud.renderTouchHint(this.displayWidth, this.displayHeight, touchHintAlpha, this.colors)
+      }
     } else if (game.state === GameState.PAUSED) {
       this.hud.renderHUD(this.displayWidth, game.score, game.level, game.highScore, this.colors)
       this.hud.renderPause(this.displayWidth, this.displayHeight, this.colors)
