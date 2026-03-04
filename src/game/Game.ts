@@ -27,6 +27,7 @@ export class Game {
   score: number
   level: number
   highScore: number
+  isNewHighScore: boolean
 
   private config: GameConfig
   private callbacks: GameCallbacks
@@ -41,11 +42,13 @@ export class Game {
     this.score = 0
     this.level = 1
     this.highScore = 0
+    this.isNewHighScore = false
   }
 
   start(): void {
     this.score = 0
     this.level = 1
+    this.isNewHighScore = false
     const centerX = Math.floor(this.config.gridWidth / 2)
     const centerY = Math.floor(this.config.gridHeight / 2)
     this.snake = new Snake(centerX, centerY, 3)
@@ -91,7 +94,7 @@ export class Game {
   }
 
   getTickInterval(): number {
-    return getSpeedForLevel(this.level)
+    return getSpeedForLevel(this.level, this.config.initialSpeed)
   }
 
   pause(): void {
@@ -115,7 +118,8 @@ export class Game {
   }
 
   private _die(): void {
-    if (this.score > this.highScore) {
+    this.isNewHighScore = this.score > this.highScore
+    if (this.isNewHighScore) {
       this.highScore = this.score
     }
     this.callbacks.onDeath?.(this.snake.getSegments())

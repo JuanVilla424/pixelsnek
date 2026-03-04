@@ -1,6 +1,8 @@
 import { Game } from '../game/Game'
 import { GameState, Particle, Position } from '../game/types'
 import { ThemeColors, ThemeManager, DARK } from '../ui/Theme'
+import { Leaderboard } from '../ui/Leaderboard'
+import { HUD } from '../ui/HUD'
 
 export class Renderer {
   private canvas: HTMLCanvasElement
@@ -11,6 +13,7 @@ export class Renderer {
   private gridWidth: number
   private gridHeight: number
   private colors: ThemeColors
+  private hud: HUD
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -30,6 +33,7 @@ export class Renderer {
     const ctx = canvas.getContext('2d')
     if (!ctx) throw new Error('Failed to get 2D context')
     this.ctx = ctx
+    this.hud = new HUD(this.ctx)
     this.resize()
     window.addEventListener('resize', () => this.resize())
   }
@@ -144,22 +148,27 @@ export class Renderer {
       this.renderSnake(game.snake.getSegments())
       this.renderParticles(particles)
     }
-    if (game.state === GameState.PAUSED) {
-      this._renderOverlay('PAUSED')
+    if (game.state === GameState.MENU) {
+      this.hud.renderMenu(this.displayWidth, this.displayHeight, game.highScore, this.colors)
+    } else if (game.state === GameState.PLAYING) {
+      this.hud.renderHUD(this.displayWidth, game.score, game.level, game.highScore, this.colors)
+    } else if (game.state === GameState.PAUSED) {
+      this.hud.renderHUD(this.displayWidth, game.score, game.level, game.highScore, this.colors)
+      this.hud.renderPause(this.displayWidth, this.displayHeight, this.colors)
     } else if (game.state === GameState.GAME_OVER) {
-      this._renderOverlay(`GAME OVER  score: ${game.score}`)
-    } else if (game.state === GameState.MENU) {
-      this._renderOverlay('PRESS ENTER TO START')
+      this.hud.renderGameOver(
+        this.displayWidth,
+        this.displayHeight,
+        game.score,
+        game.level,
+        game.highScore,
+        game.isNewHighScore,
+        this.colors,
+      )
     }
   }
 
-  private _renderOverlay(text: string): void {
-    this.ctx.fillStyle = 'rgba(0,0,0,0.5)'
-    this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight)
-    this.ctx.fillStyle = '#ffffff'
-    this.ctx.font = `bold ${Math.max(16, Math.floor(this.cellSize * 1.2))}px system-ui`
-    this.ctx.textAlign = 'center'
-    this.ctx.textBaseline = 'middle'
-    this.ctx.fillText(text, this.displayWidth / 2, this.displayHeight / 2)
+  renderLeaderboard(leaderboard: Leaderboard, highlightIndex?: number, clearConfirmPending?: boolean): void {
+    leaderboard.renderPanel(this.ctx, this.displayWidth, this.displayHeight, this.colors, highlightIndex, clearConfirmPending)
   }
 }

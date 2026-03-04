@@ -29,6 +29,8 @@ function makeMockCtx(): CanvasRenderingContext2D {
     stroke: vi.fn(),
     save: vi.fn(),
     restore: vi.fn(),
+    translate: vi.fn(),
+    scale: vi.fn(),
     fillText: vi.fn(),
     measureText: vi.fn(() => ({ width: 0 })),
     fillStyle: '',
@@ -194,10 +196,46 @@ describe('Renderer.render()', () => {
     expect(ctx.arc).toHaveBeenCalled()
   })
 
-  it('does not draw snake or food in MENU state', () => {
+  it('does not draw food arc in MENU state', () => {
     const { renderer, ctx } = makeRenderer()
     renderer.render(game)
-    expect(ctx.roundRect).not.toHaveBeenCalled()
+    expect(ctx.arc).not.toHaveBeenCalled()
+  })
+
+  it('renders PIXELSNEK title text in MENU state', () => {
+    const { renderer, ctx } = makeRenderer()
+    renderer.render(game)
+    const texts = (ctx.fillText as ReturnType<typeof vi.fn>).mock.calls.map((c: unknown[]) => c[0] as string)
+    expect(texts).toContain('PIXELSNEK')
+  })
+
+  it('renders Score HUD text in PLAYING state', () => {
+    const { renderer, ctx } = makeRenderer()
+    game.start()
+    renderer.render(game)
+    const texts = (ctx.fillText as ReturnType<typeof vi.fn>).mock.calls.map((c: unknown[]) => c[0] as string)
+    expect(texts.some((t) => t.startsWith('Score:'))).toBe(true)
+  })
+
+  it('renders HUD and PAUSED text in PAUSED state', () => {
+    const { renderer, ctx } = makeRenderer()
+    game.start()
+    game.pause()
+    renderer.render(game)
+    const texts = (ctx.fillText as ReturnType<typeof vi.fn>).mock.calls.map((c: unknown[]) => c[0] as string)
+    expect(texts.some((t) => t.startsWith('Score:'))).toBe(true)
+    expect(texts).toContain('PAUSED')
+  })
+
+  it('renders GAME OVER text in GAME_OVER state', () => {
+    const { renderer, ctx } = makeRenderer()
+    game.start()
+    game.snake.segments = [{ x: 19, y: 10 }]
+    game.snake.direction = game.snake.nextDirection = 'RIGHT' as never
+    game.update()
+    renderer.render(game)
+    const texts = (ctx.fillText as ReturnType<typeof vi.fn>).mock.calls.map((c: unknown[]) => c[0] as string)
+    expect(texts).toContain('GAME OVER')
   })
 })
 

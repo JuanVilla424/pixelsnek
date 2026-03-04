@@ -5,6 +5,7 @@ import { ParticleSystem } from './engine/Particles'
 import { Game } from './game/Game'
 import { Direction, GameState } from './game/types'
 import { ThemeManager, createThemeToggle } from './ui/Theme'
+import { Leaderboard } from './ui/Leaderboard'
 
 const canvas = document.getElementById('game-canvas') as HTMLCanvasElement | null
 
@@ -20,6 +21,30 @@ const GRID_HEIGHT = 20
 
 const renderer = new Renderer(canvas, GRID_WIDTH, GRID_HEIGHT, themeManager)
 const particleSystem = new ParticleSystem()
+const leaderboard = new Leaderboard()
+
+let leaderboardVisible = false
+let leaderboardHighlightIndex: number | undefined = undefined
+let clearConfirmPending = false
+let clearConfirmTimer: ReturnType<typeof setTimeout> | null = null
+
+function showLeaderboard(highlightIdx?: number): void {
+  leaderboardVisible = true
+  leaderboardHighlightIndex = highlightIdx
+  clearConfirmPending = false
+}
+
+function hideLeaderboard(): void {
+  leaderboardVisible = false
+  leaderboardHighlightIndex = undefined
+  clearConfirmPending = false
+  if (clearConfirmTimer !== null) {
+    clearTimeout(clearConfirmTimer)
+    clearConfirmTimer = null
+  }
+}
+
+const storedHighScore = parseInt(localStorage.getItem('pixelsnek-highscore') ?? '0', 10)
 
 const game = new Game(
   { gridWidth: GRID_WIDTH, gridHeight: GRID_HEIGHT },
@@ -53,8 +78,37 @@ const game = new Game(
         })
       }
     },
+    onStateChange: (state) => {
+      if (state === GameState.GAME_OVER) {
+        const savedBest = parseInt(localStorage.getItem('pixelsnek-highscore') ?? '0', 10)
+        if (game.highScore > savedBest) {
+          localStorage.setItem('pixelsnek-highscore', String(game.highScore))
+        }
+        if (leaderboard.isHighScore(game.score)) {
+          leaderboard.showNameInput(canvas, themeManager.getColors(), (name) => {
+            const entry = {
+              name,
+              score: game.score,
+              level: game.level,
+              date: new Date().toISOString(),
+            }
+            leaderboard.addEntry(entry)
+            const entries = leaderboard.getEntries()
+            const idx = entries.findIndex(
+              (e) => e.name === entry.name && e.score === entry.score && e.date === entry.date,
+            )
+            showLeaderboard(idx >= 0 ? idx : undefined)
+          })
+        }
+      } else if (state === GameState.MENU) {
+        hideLeaderboard()
+        leaderboard.hideNameInput()
+      }
+    },
   },
 )
+
+game.highScore = isNaN(storedHighScore) ? 0 : storedHighScore
 
 const input = new InputManager(canvas)
 
@@ -63,7 +117,11 @@ input.setOnDirectionChange((dir: Direction) => {
 })
 
 input.setOnPause(() => {
-  if (game.state === GameState.PLAYING) {
+  if (game.state === GameState.MENU || game.state === GameState.GAME_OVER) {
+    if (!leaderboardVisible) {
+      game.start()
+    }
+  } else if (game.state === GameState.PLAYING) {
     game.pause()
   } else if (game.state === GameState.PAUSED) {
     game.resume()
@@ -71,16 +129,41 @@ input.setOnPause(() => {
 })
 
 input.setOnEscape(() => {
+  if (leaderboardVisible) {
+    hideLeaderboard()
+    return
+  }
   if (game.state === GameState.GAME_OVER || game.state === GameState.PAUSED) {
     game.reset()
   }
 })
 
-document.addEventListener('keydown', (e: KeyboardEvent) => {
-  if (e.key === 'Enter') {
-    if (game.state === GameState.MENU || game.state === GameState.GAME_OVER) {
-      game.start()
+input.setOnLeaderboard(() => {
+  if (game.state === GameState.GAME_OVER) {
+    if (leaderboardVisible) {
+      hideLeaderboard()
+    } else {
+      showLeaderboard()
     }
+  }
+})
+
+input.setOnClearLeaderboard(() => {
+  if (!leaderboardVisible) return
+  if (clearConfirmPending) {
+    leaderboard.clear()
+    clearConfirmPending = false
+    if (clearConfirmTimer !== null) {
+      clearTimeout(clearConfirmTimer)
+      clearConfirmTimer = null
+    }
+  } else {
+    clearConfirmPending = true
+    if (clearConfirmTimer !== null) clearTimeout(clearConfirmTimer)
+    clearConfirmTimer = setTimeout(() => {
+      clearConfirmPending = false
+      clearConfirmTimer = null
+    }, 3000)
   }
 })
 
@@ -99,6 +182,9 @@ function loop(timestamp: number): void {
 
   particleSystem.update(dt)
   renderer.render(game, particleSystem.getParticles())
+  if (leaderboardVisible) {
+    renderer.renderLeaderboard(leaderboard, leaderboardHighlightIndex, clearConfirmPending)
+  }
   requestAnimationFrame(loop)
 }
 

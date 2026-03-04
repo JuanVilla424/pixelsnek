@@ -13,6 +13,8 @@ export class InputManager {
   private onDirectionChangeCb: DirectionCallback | null = null
   private onPauseCb: VoidCallback | null = null
   private onEscapeCb: VoidCallback | null = null
+  private onLeaderboardCb: VoidCallback | null = null
+  private onClearLeaderboardCb: VoidCallback | null = null
   private touchStart: { x: number; y: number } | null = null
 
   private readonly boundKeyDown: (e: KeyboardEvent) => void
@@ -40,6 +42,14 @@ export class InputManager {
 
   setOnEscape(cb: VoidCallback): void {
     this.onEscapeCb = cb
+  }
+
+  setOnLeaderboard(cb: VoidCallback): void {
+    this.onLeaderboardCb = cb
+  }
+
+  setOnClearLeaderboard(cb: VoidCallback): void {
+    this.onClearLeaderboardCb = cb
   }
 
   setCurrentDirection(dir: Direction): void {
@@ -103,6 +113,12 @@ export class InputManager {
         break
       case 'escape':
         this.onEscapeCb?.()
+        break
+      case 'l':
+        this.onLeaderboardCb?.()
+        break
+      case 'c':
+        this.onClearLeaderboardCb?.()
         break
     }
   }
