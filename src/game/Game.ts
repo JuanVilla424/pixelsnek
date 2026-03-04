@@ -1,4 +1,4 @@
-import { GameState, GameConfig, GameCallbacks, Direction, Position } from './types'
+import { GameState, GameConfig, GameCallbacks, Direction, Position, Particle } from './types'
 import { Grid } from './Grid'
 import { Snake } from './Snake'
 import { Food } from './Food'
@@ -27,10 +27,10 @@ export class Game {
   score: number
   level: number
   highScore: number
+  particles: Particle[]
 
   private config: GameConfig
   private callbacks: GameCallbacks
-  private intervalId: ReturnType<typeof setInterval> | null
 
   constructor(config: Partial<GameConfig> = {}, callbacks: GameCallbacks = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config }
@@ -42,19 +42,19 @@ export class Game {
     this.score = 0
     this.level = 1
     this.highScore = 0
-    this.intervalId = null
+    this.particles = []
   }
 
   start(): void {
     this.score = 0
     this.level = 1
+    this.particles = []
     const centerX = Math.floor(this.config.gridWidth / 2)
     const centerY = Math.floor(this.config.gridHeight / 2)
     this.snake = new Snake(centerX, centerY, 3)
     this.food = new Food()
     this.food.spawn(this.grid, this.snake)
     this._setState(GameState.PLAYING)
-    this._startLoop()
   }
 
   update(): void {
@@ -87,27 +87,27 @@ export class Game {
       if (newLevel !== this.level) {
         this.level = newLevel
         this.callbacks.onLevelChange?.(this.level)
-        this._restartLoop()
       }
 
       this.food.spawn(this.grid, this.snake)
     }
   }
 
+  getTickInterval(): number {
+    return getSpeedForLevel(this.level)
+  }
+
   pause(): void {
     if (this.state !== GameState.PLAYING) return
-    this._stopLoop()
     this._setState(GameState.PAUSED)
   }
 
   resume(): void {
     if (this.state !== GameState.PAUSED) return
     this._setState(GameState.PLAYING)
-    this._startLoop()
   }
 
   reset(): void {
-    this._stopLoop()
     this._setState(GameState.MENU)
   }
 
@@ -118,7 +118,6 @@ export class Game {
   }
 
   private _die(): void {
-    this._stopLoop()
     if (this.score > this.highScore) {
       this.highScore = this.score
     }
@@ -129,22 +128,5 @@ export class Game {
   private _setState(state: GameState): void {
     this.state = state
     this.callbacks.onStateChange?.(state)
-  }
-
-  private _startLoop(): void {
-    const speed = getSpeedForLevel(this.level)
-    this.intervalId = setInterval(() => this.update(), speed)
-  }
-
-  private _stopLoop(): void {
-    if (this.intervalId !== null) {
-      clearInterval(this.intervalId)
-      this.intervalId = null
-    }
-  }
-
-  private _restartLoop(): void {
-    this._stopLoop()
-    this._startLoop()
   }
 }
