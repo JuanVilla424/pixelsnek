@@ -45,10 +45,12 @@ export interface Particle {
   y: number
   vx: number
   vy: number
+  radius: number
   color: string
   alpha: number
   lifetime: number
   maxLifetime: number
+  gravity: number
 }
 
 export interface GameSnapshot {

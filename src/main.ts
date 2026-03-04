@@ -1,6 +1,7 @@
 import './styles/main.css'
 import { InputManager } from './engine/Input'
 import { Renderer } from './engine/Renderer'
+import { ParticleSystem } from './engine/Particles'
 import { Game } from './game/Game'
 import { Direction, GameState } from './game/types'
 import { ThemeManager } from './ui/Theme'
@@ -40,8 +41,44 @@ toggleBtn.addEventListener('click', () => {
 const GRID_WIDTH = 20
 const GRID_HEIGHT = 20
 
-const game = new Game({ gridWidth: GRID_WIDTH, gridHeight: GRID_HEIGHT })
 const renderer = new Renderer(canvas, GRID_WIDTH, GRID_HEIGHT, themeManager)
+const particleSystem = new ParticleSystem()
+
+const game = new Game(
+  { gridWidth: GRID_WIDTH, gridHeight: GRID_HEIGHT },
+  {
+    onEat: (headPos) => {
+      const cs = renderer.getCellSize()
+      const colors = themeManager.getColors()
+      particleSystem.emit(headPos.x * cs + cs / 2, headPos.y * cs + cs / 2, 12, {
+        color: colors.food,
+        speedMin: 2,
+        speedMax: 5,
+        lifeMin: 0.4,
+        lifeMax: 0.8,
+        radiusMin: 2,
+        radiusMax: 4,
+      })
+    },
+    onDeath: () => {
+      const cs = renderer.getCellSize()
+      const colors = themeManager.getColors()
+      for (const seg of game.snake.getSegments()) {
+        particleSystem.emit(seg.x * cs + cs / 2, seg.y * cs + cs / 2, 3 + Math.floor(Math.random() * 3), {
+          color: colors.snakeBody,
+          speedMin: 1,
+          speedMax: 3,
+          lifeMin: 0.6,
+          lifeMax: 1.2,
+          radiusMin: 2,
+          radiusMax: 6,
+          gravity: 50,
+        })
+      }
+    },
+  },
+)
+
 const input = new InputManager(canvas)
 
 input.setOnDirectionChange((dir: Direction) => {
@@ -71,13 +108,20 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
 })
 
 let lastTick = 0
+let lastTime = 0
 
 function loop(timestamp: number): void {
+  const dt = lastTime === 0 ? 0 : (timestamp - lastTime) / 1000
+  lastTime = timestamp
+
   const interval = game.getTickInterval()
   if (timestamp - lastTick >= interval) {
     game.update()
     lastTick = timestamp
   }
+
+  particleSystem.update(dt)
+  game.particles = particleSystem.getParticles()
   renderer.render(game)
   requestAnimationFrame(loop)
 }

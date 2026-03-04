@@ -120,13 +120,16 @@ export class Renderer {
     this.ctx.restore()
   }
 
+  getCellSize(): number {
+    return this.cellSize
+  }
+
   renderParticles(particles: Particle[]): void {
     for (const p of particles) {
-      const alpha = p.alpha * (p.lifetime / p.maxLifetime)
-      this.ctx.globalAlpha = alpha
+      this.ctx.globalAlpha = p.alpha
       this.ctx.fillStyle = p.color
       this.ctx.beginPath()
-      this.ctx.arc(p.x, p.y, 3, 0, Math.PI * 2)
+      this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
       this.ctx.fill()
     }
     this.ctx.globalAlpha = 1
