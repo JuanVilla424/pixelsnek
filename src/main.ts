@@ -4,7 +4,7 @@ import { Renderer } from './engine/Renderer'
 import { ParticleSystem } from './engine/Particles'
 import { Game } from './game/Game'
 import { Direction, GameState } from './game/types'
-import { ThemeManager } from './ui/Theme'
+import { ThemeManager, createThemeToggle } from './ui/Theme'
 
 const canvas = document.getElementById('game-canvas') as HTMLCanvasElement | null
 
@@ -13,30 +13,7 @@ if (!canvas) {
 }
 
 const themeManager = new ThemeManager()
-
-const toggleBtn = document.createElement('button')
-toggleBtn.id = 'theme-toggle'
-toggleBtn.setAttribute('aria-label', 'Toggle theme')
-toggleBtn.textContent = '🌙'
-document.body.appendChild(toggleBtn)
-
-function updateToggleIcon(): void {
-  const setting = themeManager.getSetting()
-  if (setting === 'dark') {
-    toggleBtn.textContent = '🌙'
-  } else if (setting === 'light') {
-    toggleBtn.textContent = '☀️'
-  } else {
-    toggleBtn.textContent = '🖥️'
-  }
-}
-
-updateToggleIcon()
-
-toggleBtn.addEventListener('click', () => {
-  themeManager.toggle()
-  updateToggleIcon()
-})
+createThemeToggle(themeManager)
 
 const GRID_WIDTH = 20
 const GRID_HEIGHT = 20

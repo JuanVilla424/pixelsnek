@@ -59,16 +59,18 @@ export class ThemeManager {
   private setting: ThemeSetting
   private mediaQuery: MediaQueryList
   private listeners: Array<(colors: ThemeColors) => void> = []
+  private _onMediaChange: () => void
 
   constructor() {
     const stored = localStorage.getItem(STORAGE_KEY) as ThemeSetting | null
     this.setting = stored === 'dark' || stored === 'light' || stored === 'system' ? stored : 'system'
     this.mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    this.mediaQuery.addEventListener('change', () => {
+    this._onMediaChange = () => {
       if (this.setting === 'system') {
         this._apply()
       }
-    })
+    }
+    this.mediaQuery.addEventListener('change', this._onMediaChange)
     this._apply()
   }
 
@@ -77,6 +79,10 @@ export class ThemeManager {
   }
 
   getSetting(): ThemeSetting {
+    return this.setting
+  }
+
+  getPreference(): ThemePreference {
     return this.setting
   }
 
@@ -90,6 +96,10 @@ export class ThemeManager {
 
   onChange(cb: (colors: ThemeColors) => void): void {
     this.listeners.push(cb)
+  }
+
+  destroy(): void {
+    this.mediaQuery.removeEventListener('change', this._onMediaChange)
   }
 
   private _resolveColors(): ThemeColors {
@@ -113,4 +123,26 @@ export class ThemeManager {
       cb(colors)
     }
   }
+}
+
+function themeIcon(pref: ThemePreference): string {
+  if (pref === 'dark') return '🌙'
+  if (pref === 'light') return '☀️'
+  return '🖥️'
+}
+
+export function createThemeToggle(themeManager: ThemeManager): HTMLButtonElement {
+  const btn = document.createElement('button')
+  btn.id = 'theme-toggle'
+  btn.setAttribute('aria-label', 'Toggle theme')
+  btn.textContent = themeIcon(themeManager.getPreference())
+  btn.addEventListener('click', () => {
+    themeManager.toggle()
+    btn.textContent = themeIcon(themeManager.getPreference())
+  })
+  themeManager.onChange(() => {
+    btn.textContent = themeIcon(themeManager.getPreference())
+  })
+  document.body.appendChild(btn)
+  return btn
 }

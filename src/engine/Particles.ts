@@ -50,4 +50,29 @@ export class ParticleSystem {
   getParticles(): Particle[] {
     return this.particles
   }
+
+  clear(): void {
+    this.particles = []
+  }
+}
+
+export const EAT_CONFIG: EmitConfig = {
+  color: '#ffffff',
+  speedMin: 2,
+  speedMax: 5,
+  lifeMin: 0.4,
+  lifeMax: 0.8,
+  radiusMin: 2,
+  radiusMax: 4,
+}
+
+export const DEATH_CONFIG: EmitConfig = {
+  color: '#ffffff',
+  speedMin: 1,
+  speedMax: 3,
+  lifeMin: 0.6,
+  lifeMax: 1.2,
+  radiusMin: 2,
+  radiusMax: 6,
+  gravity: 50,
 }
