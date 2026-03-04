@@ -125,7 +125,7 @@ export class InputManager {
     const deltaY = touch.clientY - this.touchStart.y
     this.touchStart = null
 
-    if (Math.abs(deltaX) < SWIPE_THRESHOLD && Math.abs(deltaY) < SWIPE_THRESHOLD) return
+    if (Math.abs(deltaX) <= SWIPE_THRESHOLD && Math.abs(deltaY) <= SWIPE_THRESHOLD) return
 
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
       this.enqueueDirection(deltaX > 0 ? Direction.Right : Direction.Left)
