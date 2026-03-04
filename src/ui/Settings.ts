@@ -35,8 +35,10 @@ export class SettingsManager {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) return { ...SETTINGS_DEFAULTS }
-      const parsed = JSON.parse(raw) as Partial<Settings>
-      const merged = { ...SETTINGS_DEFAULTS, ...parsed }
+      const parsed: unknown = JSON.parse(raw)
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return { ...SETTINGS_DEFAULTS }
+      const p = parsed as Record<string, unknown>
+      const merged = { ...SETTINGS_DEFAULTS, ...p }
       return {
         gridWidth: Math.min(30, Math.max(12, Math.floor(Number(merged.gridWidth)) || SETTINGS_DEFAULTS.gridWidth)),
         gridHeight: Math.min(30, Math.max(12, Math.floor(Number(merged.gridHeight)) || SETTINGS_DEFAULTS.gridHeight)),
