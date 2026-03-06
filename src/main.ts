@@ -121,7 +121,7 @@ game = new Game(
   { gridWidth: initialSettings.gridWidth, gridHeight: initialSettings.gridHeight, initialSpeed: initialSettings.initialSpeed },
   makeCallbacks(),
 )
-game.highScore = isNaN(storedHighScore) ? 0 : storedHighScore
+game.highScore = isNaN(storedHighScore) ? 0 : Math.max(0, storedHighScore)
 
 const input = new InputManager(canvas)
 input.setControlScheme(initialSettings.controlScheme)
