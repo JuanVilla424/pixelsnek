@@ -245,6 +245,114 @@ describe('Leaderboard', () => {
     })
   })
 
+  describe('input sanitization — addEntry()', () => {
+    it('strips control characters from name in addEntry', () => {
+      lb.addEntry(makeEntry(100, 'Al\x01ice\x1f'))
+      const entries = lb.getEntries()
+      expect(entries[0].name).toBe('Alice')
+    })
+
+    it('strips DEL character from name in addEntry', () => {
+      lb.addEntry(makeEntry(100, 'Bo\x7fb'))
+      expect(lb.getEntries()[0].name).toBe('Bob')
+    })
+
+    it('truncates name to 20 characters in addEntry', () => {
+      lb.addEntry(makeEntry(100, 'A'.repeat(30)))
+      expect(lb.getEntries()[0].name).toBe('A'.repeat(20))
+    })
+
+    it('falls back to Player when name is only control chars in addEntry', () => {
+      lb.addEntry(makeEntry(100, '\x01\x02\x03'))
+      expect(lb.getEntries()[0].name).toBe('Player')
+    })
+
+    it('clamps negative score to 0 in addEntry', () => {
+      lb.addEntry(makeEntry(-50))
+      expect(lb.getEntries()[0].score).toBe(0)
+    })
+
+    it('clamps level below 1 to 1 in addEntry', () => {
+      lb.addEntry({ name: 'X', score: 10, level: 0, date: new Date().toISOString() })
+      expect(lb.getEntries()[0].level).toBe(1)
+    })
+  })
+
+  describe('input sanitization — getEntries()', () => {
+    it('strips control characters from name stored in localStorage', () => {
+      const entry = { name: 'Al\x01ice', score: 100, level: 1, date: new Date().toISOString() }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([entry]))
+      expect(lb.getEntries()[0].name).toBe('Alice')
+    })
+
+    it('truncates names longer than 20 chars stored in localStorage', () => {
+      const entry = { name: 'B'.repeat(30), score: 50, level: 1, date: new Date().toISOString() }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([entry]))
+      expect(lb.getEntries()[0].name).toBe('B'.repeat(20))
+    })
+
+    it('clamps negative scores from localStorage to 0', () => {
+      const entry = { name: 'Player', score: -100, level: 1, date: new Date().toISOString() }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([entry]))
+      expect(lb.getEntries()[0].score).toBe(0)
+    })
+
+    it('filters out non-object entries from localStorage array', () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([null, 'string', 42, { name: 'OK', score: 10, level: 1, date: new Date().toISOString() }]))
+      const entries = lb.getEntries()
+      expect(entries).toHaveLength(1)
+      expect(entries[0].name).toBe('OK')
+    })
+
+    it('returns empty array when localStorage contains a non-array', () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: 'Player', score: 100 }))
+      expect(lb.getEntries()).toEqual([])
+    })
+  })
+
+  describe('input sanitization — showNameInput()', () => {
+    let canvas: HTMLCanvasElement
+
+    beforeEach(() => {
+      canvas = document.createElement('canvas')
+      canvas.width = 400
+      canvas.height = 300
+      document.body.appendChild(canvas)
+    })
+
+    afterEach(() => {
+      lb.hideNameInput()
+      if (canvas.parentNode) canvas.parentNode.removeChild(canvas)
+    })
+
+    it('strips control characters from submitted name', () => {
+      const onSubmit = vi.fn()
+      lb.showNameInput(canvas, DARK, onSubmit)
+      const input = document.querySelector('input') as HTMLInputElement
+      input.value = 'Al\x01ice'
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+      expect(onSubmit).toHaveBeenCalledWith('Alice')
+    })
+
+    it('truncates submitted name to 10 characters', () => {
+      const onSubmit = vi.fn()
+      lb.showNameInput(canvas, DARK, onSubmit)
+      const input = document.querySelector('input') as HTMLInputElement
+      input.value = 'A'.repeat(20)
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+      expect(onSubmit).toHaveBeenCalledWith('A'.repeat(10))
+    })
+
+    it('falls back to Player when submitted name is only control chars', () => {
+      const onSubmit = vi.fn()
+      lb.showNameInput(canvas, DARK, onSubmit)
+      const input = document.querySelector('input') as HTMLInputElement
+      input.value = '\x01\x1f\x7f'
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+      expect(onSubmit).toHaveBeenCalledWith('Player')
+    })
+  })
+
   describe('renderPanel()', () => {
     it('calls fillRect at least once (overlay background)', () => {
       const ctx = makeCtx()

@@ -98,7 +98,7 @@ export class Leaderboard {
     input.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault()
-        const name = input.value.trim() || 'Player'
+        const name = input.value.trim().replace(/[\x00-\x1f\x7f]/g, '').slice(0, 10) || 'Player'
         remove()
         onSubmit(name)
       } else if (e.key === 'Escape') {

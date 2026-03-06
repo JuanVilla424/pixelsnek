@@ -187,3 +187,50 @@ describe('SettingsManager — reset()', () => {
     expect(manager2.get()).toEqual(SETTINGS_DEFAULTS)
   })
 })
+
+describe('SettingsManager — prototype pollution filtering', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('ignores __proto__ key in stored JSON', () => {
+    localStorage.setItem('pixelsnek-settings', '{"__proto__":{"polluted":true},"gridWidth":25}')
+    const manager = new SettingsManager()
+    expect(manager.get().gridWidth).toBe(25)
+    expect(({} as Record<string, unknown>)['polluted']).toBeUndefined()
+  })
+
+  it('ignores constructor key in stored JSON', () => {
+    localStorage.setItem('pixelsnek-settings', '{"constructor":{"polluted":true},"gridWidth":22}')
+    const manager = new SettingsManager()
+    expect(manager.get().gridWidth).toBe(22)
+    expect(({} as Record<string, unknown>)['polluted']).toBeUndefined()
+  })
+
+  it('ignores prototype key in stored JSON', () => {
+    localStorage.setItem('pixelsnek-settings', '{"prototype":{"polluted":true},"gridWidth":18}')
+    const manager = new SettingsManager()
+    expect(manager.get().gridWidth).toBe(18)
+    expect(({} as Record<string, unknown>)['polluted']).toBeUndefined()
+  })
+
+  it('loads valid settings alongside filtered keys', () => {
+    localStorage.setItem('pixelsnek-settings', '{"__proto__":{"evil":1},"showParticles":false,"gridWidth":15}')
+    const manager = new SettingsManager()
+    const s = manager.get()
+    expect(s.showParticles).toBe(false)
+    expect(s.gridWidth).toBe(15)
+  })
+
+  it('clamps gridWidth values from JSON to valid range', () => {
+    localStorage.setItem('pixelsnek-settings', '{"gridWidth":999}')
+    const manager = new SettingsManager()
+    expect(manager.get().gridWidth).toBe(30)
+  })
+
+  it('clamps initialSpeed values from JSON to valid range', () => {
+    localStorage.setItem('pixelsnek-settings', '{"initialSpeed":1}')
+    const manager = new SettingsManager()
+    expect(manager.get().initialSpeed).toBe(50)
+  })
+})
