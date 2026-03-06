@@ -38,7 +38,10 @@ export class SettingsManager {
       const parsed: unknown = JSON.parse(raw)
       if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return { ...SETTINGS_DEFAULTS }
       const p = parsed as Record<string, unknown>
-      const merged = { ...SETTINGS_DEFAULTS, ...p }
+      const safe: Record<string, unknown> = Object.fromEntries(
+        Object.entries(p).filter(([k]) => k !== '__proto__' && k !== 'constructor' && k !== 'prototype'),
+      )
+      const merged = { ...SETTINGS_DEFAULTS, ...safe }
       return {
         gridWidth: Math.min(30, Math.max(12, Math.floor(Number(merged.gridWidth)) || SETTINGS_DEFAULTS.gridWidth)),
         gridHeight: Math.min(30, Math.max(12, Math.floor(Number(merged.gridHeight)) || SETTINGS_DEFAULTS.gridHeight)),
