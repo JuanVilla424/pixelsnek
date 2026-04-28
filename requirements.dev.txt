@@ -1,6 +1,6 @@
 pre-commit>=4.0.0
 pylint>=3.3.1
-poetry>=1.8.4
+poetry>=2.3.4
 bump2version>=1.0.0
 toml>=0.10.1
 black>=24.3.0
